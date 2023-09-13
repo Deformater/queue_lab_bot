@@ -76,6 +76,7 @@ async def cancel_handler(query: CallbackQuery, state: FSMContext, bot: Bot) -> N
         await state.set_state(Form.name)
     elif state == "Form:date_choose": 
         await state.set_state(Form.laba_choose)
+        await laba_handler()
     elif state == "Form:action_choose": 
         await state.set_state(Form.date_choose)
     print(current_state)
