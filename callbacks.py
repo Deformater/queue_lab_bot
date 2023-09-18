@@ -13,5 +13,5 @@ class DateCallback(CallbackData, prefix="date"):
     date: str
 
 
-class ActionCallback(CallbackData, prefix="date"):
+class ActionCallback(CallbackData, prefix="action"):
     action: str

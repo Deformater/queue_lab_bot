@@ -46,7 +46,6 @@ def action_keyboard():
     builder = InlineKeyboardBuilder()
 
     builder.button(text="Записаться", callback_data=ActionCallback(action="join"))
-    builder.button(text="Очередь", callback_data=ActionCallback(action="look"))
 
     builder.attach(base_keyboard())
     builder.adjust(2, 1)
