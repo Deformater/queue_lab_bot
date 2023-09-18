@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  bot:
+    image: bot:latest-local
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    restart: always
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    ports:
+      - "15433:5432"
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    env_file:
+      - .env
+    ports:
+      - "15432:80"
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
+  pgadmin:

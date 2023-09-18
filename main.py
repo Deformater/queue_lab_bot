@@ -28,7 +28,6 @@ class Form(StatesGroup):
     action_choose = State()
 
 
-
 @dp.message(CommandStart())
 async def command_start(message: Message, state: FSMContext) -> None:
     await state.set_state(Form.name)
@@ -39,38 +38,58 @@ async def command_start(message: Message, state: FSMContext) -> None:
 async def process_name(message: Message, state: FSMContext) -> None:
     await state.update_data(name=message.text)
     await state.set_state(Form.laba_choose)
-    await message.answer(
-        "Выберите предмет",
-        reply_markup=laba_keyboard()
-    )
+    await message.answer("Выберите предмет", reply_markup=laba_keyboard())
 
 
 @dp.callback_query(LabaCallback.filter())
-async def laba_handler(query: CallbackQuery, callback_data: LabaCallback, state: FSMContext) -> None:
+async def laba_handler(
+    query: CallbackQuery, callback_data: LabaCallback, state: FSMContext
+) -> None:
     await state.set_state(Form.date_choose)
-    await query.message.edit_text(text=f"Выберите дату сдачи лабораторной", reply_markup=date_keyboard())
+    await query.message.edit_text(
+        text=f"Выберите дату сдачи лабораторной", reply_markup=date_keyboard()
+    )
+
 
 @dp.callback_query(CancelCallback.filter(), Form.date_choose)
-async def laba_handler(query: CallbackQuery, callback_data: LabaCallback, state: FSMContext) -> None:
+async def laba_handler(
+    query: CallbackQuery, callback_data: LabaCallback, state: FSMContext
+) -> None:
     await state.set_state(Form.laba_choose)
-    await query.message.edit_text(text=f"Выберите предмет", reply_markup=laba_keyboard())
+    await query.message.edit_text(
+        text=f"Выберите предмет", reply_markup=laba_keyboard()
+    )
 
 
 @dp.callback_query(DateCallback.filter())
-async def date_handler(query: CallbackQuery, callback_data: DateCallback, state: FSMContext) -> None:
+async def date_handler(
+    query: CallbackQuery, callback_data: DateCallback, state: FSMContext
+) -> None:
     await state.set_state(Form.action_choose)
-    await query.message.edit_text(text=f"Выберите действие", reply_markup=action_keyboard())
+    await query.message.edit_text(
+        text=f"Выберите действие", reply_markup=action_keyboard()
+    )
+
 
 @dp.callback_query(CancelCallback.filter(), Form.action_choose)
-async def laba_handler(query: CallbackQuery, callback_data: LabaCallback, state: FSMContext) -> None:
+async def laba_handler(
+    query: CallbackQuery, callback_data: LabaCallback, state: FSMContext
+) -> None:
     await state.set_state(Form.date_choose)
-    await query.message.edit_text(text=f"Выберите дату сдачи лабораторной", reply_markup=date_keyboard())
-    
+    await query.message.edit_text(
+        text=f"Выберите дату сдачи лабораторной", reply_markup=date_keyboard()
+    )
+
 
 @dp.callback_query(ActionCallback.filter(), Form.action_choose)
-async def action_handler(query: CallbackQuery, callback_data: ActionCallback, state: FSMContext) -> None:
-    
-    await query.message.edit_text(text=f"Вы успешно записались в очередь!", reply_markup=action_keyboard())
+async def action_handler(
+    query: CallbackQuery, callback_data: ActionCallback, state: FSMContext
+) -> None:
+
+    await query.message.edit_text(
+        text=f"Вы успешно записались в очередь!", reply_markup=action_keyboard()
+    )
+
 
 async def init_db(config):
     await register_db(config)
