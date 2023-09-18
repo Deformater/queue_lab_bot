@@ -78,11 +78,14 @@ async def date_handler(
 ) -> None:
     await state.update_data(date=callback_data.date)
     await state.set_state(Form.action)
+    data = await state.get_data()
 
     date = datetime.datetime.strptime(callback_data.date, "%d/%m")
     date = date.replace(year=datetime.datetime.now().year)
 
-    records = await Record.filter(lab_date=date).order_by("datetime")
+    records = await Record.filter(lab_date=date, lab_name=data["laba"]).order_by(
+        "datetime"
+    )
     output = ""
     for number, record in enumerate(list(records)):
         output += f"{number + 1}. {record.student_name} {record.student_group}\n"
@@ -119,7 +122,9 @@ async def action_handler(
         lab_date=date,
     )
 
-    records = await Record.filter(lab_date=date).order_by("datetime")
+    records = await Record.filter(lab_date=date, lab_name=data["laba"]).order_by(
+        "datetime"
+    )
     output = ""
     for number, record in enumerate(list(records)):
         output += f"{number + 1}. {record.student_name} {record.student_group}\n"
