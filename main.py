@@ -115,23 +115,33 @@ async def action_handler(
     date = datetime.datetime.strptime(data["date"], "%d/%m")
     date = date.replace(year=datetime.datetime.now().year)
 
-    await Record.create(
-        student_name=full_name,
+    record = await Record.filter(
         student_group=group,
-        lab_name=data["laba"],
+        student_name=full_name,
         lab_date=date,
-    )
+        lab_name=data["laba"],
+    ).order_by("datetime")
+    if (not record) or (
+        (datetime.datetime.utcnow() - record[-1].datetime.replace(tzinfo=None))
+        > datetime.timedelta(minutes=30)
+    ):
+        await Record.create(
+            student_name=full_name,
+            student_group=group,
+            lab_name=data["laba"],
+            lab_date=date,
+        )
+        output = "Вы успешно записались!\n"
+    else:
+        output = "Вы пока не можете записаться\n"
 
     records = await Record.filter(lab_date=date, lab_name=data["laba"]).order_by(
         "datetime"
     )
-    output = ""
     for number, record in enumerate(list(records)):
         output += f"{number + 1}. {record.student_name} {record.student_group}\n"
 
-    await query.message.edit_text(
-        text=f"Вы успешно записались!\n{output}", reply_markup=action_keyboard()
-    )
+    await query.message.edit_text(text=f"{output}", reply_markup=action_keyboard())
 
 
 async def init_db(config):
