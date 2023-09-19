@@ -21,3 +21,7 @@ TORTOISE_ORM = {
     },
     "use_tz": True,
 }
+
+REDIS_HOST = config("REDIS_HOST", cast=str)
+REDIS_PORT = config("REDIS_PORT", cast=int)
+REDIS_PASSWORD = config("REDIS_PASSWORD", cast=str)

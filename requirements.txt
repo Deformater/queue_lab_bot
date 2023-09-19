@@ -3,3 +3,4 @@ python-decouple
 aerich
 tortoise
 asyncpg
+redis

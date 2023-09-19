@@ -1,4 +1,5 @@
 version: "3.8"
+
 services:
   bot:
     image: bot:latest-local
@@ -9,6 +10,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - postgres
+      - redis
     restart: always
 
   postgres:
@@ -32,6 +34,15 @@ services:
     depends_on:
       - postgres
 
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
 volumes:
   pgdata:
   pgadmin:
+  redis_data:
