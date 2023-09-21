@@ -11,7 +11,7 @@ from callbacks import LabaCallback, DateCallback, ActionCallback, CancelCallback
 
 from data.models import Record
 
-from utils import name_validation
+from utils import name_validation, stream_validation
 
 
 dlg_router = Router()
@@ -20,12 +20,14 @@ dlg_router = Router()
 class Form(StatesGroup):
     name = State()
     laba = State()
+    stream = State()
     date = State()
     action = State()
 
 
 @dlg_router.message(CommandStart())
 async def command_start(message: Message, state: FSMContext) -> None:
+    await state.clear()
     await state.set_state(Form.name)
     await message.answer(
         f"Введите ваше ФИО и Группу\nИванов Иван Иванович P1111",
@@ -43,15 +45,23 @@ async def process_name(message: Message, state: FSMContext) -> None:
         await message.answer("Неверный формат ввода")
 
 
+# Лаба колбек
 @dlg_router.callback_query(LabaCallback.filter())
 async def laba_handler(
     query: CallbackQuery, callback_data: LabaCallback, state: FSMContext
 ) -> None:
     await state.update_data(laba=callback_data.name)
-    await state.set_state(Form.date)
-    await query.message.edit_text(
-        text=f"Выберите дату сдачи лабораторной", reply_markup=date_keyboard()
-    )
+
+    data = await state.get_data()
+    stream = data.get("stream")
+    if stream is None:
+        await state.set_state(Form.stream)
+        await query.message.edit_text(text=f"Введите группу\nФормат: 10.1")
+    else:
+        await state.set_state(Form.date)
+        await query.message.edit_text(
+            text=f"Ввыберите дату", reply_markup=date_keyboard()
+        )
 
 
 @dlg_router.callback_query(CancelCallback.filter(), Form.date)
@@ -64,6 +74,17 @@ async def cancel_laba_handler(
     )
 
 
+@dlg_router.message(Form.stream)
+async def process_stream(message: Message, state: FSMContext) -> None:
+    if stream_validation(message.text):
+        await state.update_data(stream=message.text)
+        await state.set_state(Form.date)
+        await message.answer("Выберите дату", reply_markup=date_keyboard())
+    else:
+        await message.answer("Неверный формат ввода")
+
+
+# Дата колбек
 @dlg_router.callback_query(DateCallback.filter())
 async def date_handler(
     query: CallbackQuery, callback_data: DateCallback, state: FSMContext
@@ -97,6 +118,7 @@ async def cancel_date_handler(
     )
 
 
+# Action колбек
 @dlg_router.callback_query(ActionCallback.filter())
 async def action_handler(
     query: CallbackQuery, callback_data: ActionCallback, state: FSMContext
