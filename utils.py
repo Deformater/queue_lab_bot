@@ -1,5 +1,5 @@
 def name_validation(name: str) -> bool:
-    if len(name.split()) != 4:
+    if len(name.split()) != 4 or name > 255:
         return False
 
     name, surname, patronymic, group = name.split()
@@ -8,7 +8,7 @@ def name_validation(name: str) -> bool:
 
 
 def stream_validation(stream: str) -> bool:
-    if len(stream.split(".")) != 2:
+    if len(stream.split(".")) != 2 or len(stream) > 20:
         return False
 
     stream1, stream2 = stream.split(".")

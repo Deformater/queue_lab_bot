@@ -128,13 +128,16 @@ async def action_handler(
     full_name = f"{name} {surname} {patronymic}"
     date = datetime.datetime.strptime(data["date"], "%d/%m")
     date = date.replace(year=datetime.datetime.now().year)
+    stream = data["stream"]
 
     record = await Record.filter(
         student_group=group,
         student_name=full_name,
         lab_date=date,
         lab_name=data["laba"],
+        stream=stream,
     ).order_by("datetime")
+
     if (not record) or (
         (datetime.datetime.utcnow() - record[-1].datetime.replace(tzinfo=None))
         > datetime.timedelta(minutes=30)
@@ -144,14 +147,15 @@ async def action_handler(
             student_group=group,
             lab_name=data["laba"],
             lab_date=date,
+            stream=stream,
         )
         output = "Вы успешно записались!\n"
     else:
         output = "Вы пока не можете записаться\n"
 
-    records = await Record.filter(lab_date=date, lab_name=data["laba"]).order_by(
-        "datetime"
-    )
+    records = await Record.filter(
+        lab_date=date, lab_name=data["laba"], stream=stream
+    ).order_by("datetime")
     for number, record in enumerate(list(records)):
         output += f"{number + 1}. {record.student_name} {record.student_group}\n"
 
