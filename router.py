@@ -53,8 +53,8 @@ async def laba_handler(
     await state.update_data(laba=callback_data.name)
 
     data = await state.get_data()
-    stream = data.get("stream")
-    if stream is None:
+    stream = data.get("stream", dict())
+    if stream.get(data["laba"]) is None:
         await state.set_state(Form.stream)
         await query.message.edit_text(text=f"Введите группу\nФормат: 10.1")
     else:
@@ -74,10 +74,16 @@ async def cancel_laba_handler(
     )
 
 
+# Ввод поток
 @dlg_router.message(Form.stream)
 async def process_stream(message: Message, state: FSMContext) -> None:
     if stream_validation(message.text):
-        await state.update_data(stream=message.text)
+        data = await state.get_data()
+
+        stream = data.get("stream", dict())
+        stream[data["laba"]] = message.text
+
+        await state.update_data(stream=stream)
         await state.set_state(Form.date)
         await message.answer("Выберите дату", reply_markup=date_keyboard())
     else:
@@ -96,9 +102,11 @@ async def date_handler(
     date = datetime.datetime.strptime(callback_data.date, "%d/%m")
     date = date.replace(year=datetime.datetime.now().year)
 
-    records = await Record.filter(lab_date=date, lab_name=data["laba"]).order_by(
-        "datetime"
-    )
+    stream = data["stream"][data["laba"]]
+
+    records = await Record.filter(
+        lab_date=date, lab_name=data["laba"], stream=stream
+    ).order_by("datetime")
     output = ""
     for number, record in enumerate(list(records)):
         output += f"{number + 1}. {record.student_name} {record.student_group}\n"
@@ -128,7 +136,7 @@ async def action_handler(
     full_name = f"{name} {surname} {patronymic}"
     date = datetime.datetime.strptime(data["date"], "%d/%m")
     date = date.replace(year=datetime.datetime.now().year)
-    stream = data["stream"]
+    stream = data["stream"][data["laba"]]
 
     record = await Record.filter(
         student_group=group,

@@ -1,5 +1,5 @@
 def name_validation(name: str) -> bool:
-    if len(name.split()) != 4 or name > 255:
+    if len(name.split()) != 4 or len(name) > 255:
         return False
 
     name, surname, patronymic, group = name.split()
