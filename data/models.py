@@ -16,7 +16,7 @@ class Record(models.Model):
 
 
 class Chat(models.Model):
-    tg_id = fields.IntField(unique=True, pk=True)
+    tg_id = fields.BigIntField(unique=True, pk=True)
 
     class Meta:
         table = "chats"
