@@ -1,7 +1,7 @@
 import datetime
 
-from aiogram import Router, html
-from aiogram.filters import CommandStart, Command, CommandObject
+from aiogram import Router, html, F
+from aiogram.filters import CommandStart, Command, CommandObject, ExceptionTypeFilter
 from aiogram.types import (
     Message,
     InlineQuery,
@@ -33,13 +33,9 @@ class Form(StatesGroup):
     action = State()
 
 
-# @dlg_router.error()
-# async def error_handler(event: ErrorEvent) -> None:
-#     bot.send_message(
-#         bot.me.id,
-#         "Что-то пошло не так, попробуйте перезапустить бота /start",
-#         reply_markup=ReplyKeyboardRemove(),
-#     )
+# @dlg_router.error(ExceptionTypeFilter(KeyError), F.update.query.as_("query"))
+# async def error_handler(event: ErrorEvent, query: CallbackQuery) -> None:
+#         await query.message.answer("Что-то пошло не так, перезапустите бота /start")
 
 
 @dlg_router.message(CommandStart())
@@ -86,9 +82,7 @@ async def laba_handler(
     stream = data.get("stream", dict())
     if stream.get(data["laba"]) is None:
         await state.set_state(Form.stream)
-        await query.message.edit_text(
-            text=f"Введите группу\nФормат: 10.1", reply_markup=ReplyKeyboardRemove()
-        )
+        await query.message.edit_text(text=f"Введите группу\nФормат: 10.1")
     else:
         await state.set_state(Form.date)
         await query.message.edit_text(
