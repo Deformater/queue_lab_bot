@@ -1,7 +1,7 @@
 import datetime
 
-from aiogram import Router
-from aiogram.filters import CommandStart, Command
+from aiogram import Router, html
+from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.types import (
     Message,
     InlineQuery,
@@ -15,7 +15,7 @@ from aiogram.fsm.state import State, StatesGroup
 from keyboards import action_keyboard, laba_keyboard, date_keyboard
 from callbacks import LabaCallback, DateCallback, ActionCallback, CancelCallback
 
-from data.models import Record
+from data.models import Record, Chat
 
 from utils import name_validation, stream_validation
 
@@ -33,18 +33,21 @@ class Form(StatesGroup):
     action = State()
 
 
-@dlg_router.error()
-async def error_handler(event: ErrorEvent, message: Message) -> None:
-    message.edit_text(
-        "Что-то пошло не так, попробуйте перезапустить бота /start",
-        reply_markup=ReplyKeyboardRemove(),
-    )
+# @dlg_router.error()
+# async def error_handler(event: ErrorEvent) -> None:
+#     bot.send_message(
+#         bot.me.id,
+#         "Что-то пошло не так, попробуйте перезапустить бота /start",
+#         reply_markup=ReplyKeyboardRemove(),
+#     )
 
 
 @dlg_router.message(CommandStart())
 async def command_start(message: Message, state: FSMContext) -> None:
     await state.clear()
     await state.set_state(Form.name)
+
+    await Chat.get_or_create(tg_id=message.chat.id)
 
     await message.answer(
         f"Введите ваше ФИО и Группу\nИванов Иван Иванович P1111",
@@ -53,12 +56,13 @@ async def command_start(message: Message, state: FSMContext) -> None:
 
 
 @dlg_router.message(Command("admin"))
-async def command_start(message: Message) -> None:
+async def command_admin(message: Message, command: CommandObject) -> None:
     if message.chat.id == settings.ADMIN_ID:
-        await message.answer(
-            f"{message.text}",
-            reply_markup=ReplyKeyboardRemove(),
-        )
+        chats = await Chat.all()
+        args = command.args
+        if args is not None:
+            for chat in chats:
+                await message.bot.send_message(chat.tg_id, args)
 
 
 @dlg_router.message(Form.name)
