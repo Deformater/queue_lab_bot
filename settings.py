@@ -22,6 +22,24 @@ TORTOISE_ORM = {
     "use_tz": True,
 }
 
+DB_HOST_DEV = config("DB_HOST_DEV", cast=str)
+DB_PORT_DEV = config("DB_PORT_DEV", cast=int)
+
+TORTOISE_ORM_DEV = {
+    "connections": {
+        "default": f"postgres://{DB_USER}:{DB_PASS}@{DB_HOST_DEV}:{DB_PORT_DEV}/{DB_NAME}"
+    },
+    "apps": {
+        "models": {
+            "models": ["data.models", "aerich.models"],
+            "default_connection": "default",
+        },
+    },
+    "use_tz": True,
+}
+
 REDIS_HOST = config("REDIS_HOST", cast=str)
 REDIS_PORT = config("REDIS_PORT", cast=int)
 REDIS_PASSWORD = config("REDIS_PASSWORD", cast=str)
+
+ADMIN_ID = config("ADMIN_ID", cast=int)

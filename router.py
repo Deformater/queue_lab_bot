@@ -1,8 +1,14 @@
 import datetime
 
 from aiogram import Router
-from aiogram.filters import CommandStart
-from aiogram.types import Message, InlineQuery, CallbackQuery, ReplyKeyboardRemove
+from aiogram.filters import CommandStart, Command
+from aiogram.types import (
+    Message,
+    InlineQuery,
+    CallbackQuery,
+    ReplyKeyboardRemove,
+    ErrorEvent,
+)
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
@@ -12,6 +18,8 @@ from callbacks import LabaCallback, DateCallback, ActionCallback, CancelCallback
 from data.models import Record
 
 from utils import name_validation, stream_validation
+
+import settings
 
 
 dlg_router = Router()
@@ -25,14 +33,32 @@ class Form(StatesGroup):
     action = State()
 
 
+@dlg_router.error()
+async def error_handler(event: ErrorEvent, message: Message) -> None:
+    message.edit_text(
+        "Что-то пошло не так, попробуйте перезапустить бота /start",
+        reply_markup=ReplyKeyboardRemove(),
+    )
+
+
 @dlg_router.message(CommandStart())
 async def command_start(message: Message, state: FSMContext) -> None:
     await state.clear()
     await state.set_state(Form.name)
+
     await message.answer(
         f"Введите ваше ФИО и Группу\nИванов Иван Иванович P1111",
         reply_markup=ReplyKeyboardRemove(),
     )
+
+
+@dlg_router.message(Command("admin"))
+async def command_start(message: Message) -> None:
+    if message.chat.id == settings.ADMIN_ID:
+        await message.answer(
+            f"{message.text}",
+            reply_markup=ReplyKeyboardRemove(),
+        )
 
 
 @dlg_router.message(Form.name)
@@ -56,7 +82,9 @@ async def laba_handler(
     stream = data.get("stream", dict())
     if stream.get(data["laba"]) is None:
         await state.set_state(Form.stream)
-        await query.message.edit_text(text=f"Введите группу\nФормат: 10.1")
+        await query.message.edit_text(
+            text=f"Введите группу\nФормат: 10.1", reply_markup=ReplyKeyboardRemove()
+        )
     else:
         await state.set_state(Form.date)
         await query.message.edit_text(

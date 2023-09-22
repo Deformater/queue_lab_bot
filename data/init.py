@@ -10,5 +10,4 @@ async def register_db(config):
 async def upgrade_db(config):
     command = Command(tortoise_config=config, app="models")
     await command.init()
-    await command.migrate()
     await command.upgrade(run_in_transaction=False)

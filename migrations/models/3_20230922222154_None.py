@@ -3,7 +3,10 @@ from tortoise import BaseDBAsyncClient
 
 async def upgrade(db: BaseDBAsyncClient) -> str:
     return """
-        CREATE TABLE IF NOT EXISTS "records" (
+        CREATE TABLE IF NOT EXISTS "chats" (
+    "tg_id" SERIAL NOT NULL PRIMARY KEY
+);
+CREATE TABLE IF NOT EXISTS "records" (
     "uuid" UUID NOT NULL  PRIMARY KEY,
     "student_name" VARCHAR(255) NOT NULL,
     "student_group" VARCHAR(255) NOT NULL,

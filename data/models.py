@@ -13,3 +13,10 @@ class Record(models.Model):
 
     class Meta:
         table = "records"
+
+
+class Chat(models.Model):
+    tg_id = fields.IntField(unique=True, pk=True)
+
+    class Meta:
+        table = "chats"
