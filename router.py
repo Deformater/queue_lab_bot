@@ -11,6 +11,7 @@ from aiogram.types import (
 )
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.exceptions import TelegramForbiddenError
 
 from keyboards import action_keyboard, laba_keyboard, date_keyboard
 from callbacks import LabaCallback, DateCallback, ActionCallback, CancelCallback
@@ -58,7 +59,10 @@ async def command_admin(message: Message, command: CommandObject) -> None:
         args = command.args
         if args is not None:
             for chat in chats:
-                await message.bot.send_message(chat.tg_id, args)
+                try:
+                    await message.bot.send_message(chat.tg_id, args)
+                except TelegramForbiddenError:
+                    continue
 
 
 @dlg_router.message(Form.name)
@@ -125,8 +129,8 @@ async def date_handler(
     await state.set_state(Form.action)
     data = await state.get_data()
 
-    date = datetime.datetime.strptime(callback_data.date, "%d/%m")
-    date = date.replace(year=datetime.datetime.now().year)
+    now_year = datetime.datetime.now().year
+    date = datetime.datetime.strptime(f'{data["date"]}/{now_year}', "%d/%m/%Y")
 
     stream = data["stream"][data["laba"]]
 
@@ -160,8 +164,8 @@ async def action_handler(
     data = await state.get_data()
     name, surname, patronymic, group = data["name"]
     full_name = f"{name} {surname} {patronymic}"
-    date = datetime.datetime.strptime(data["date"], "%d/%m")
-    date = date.replace(year=datetime.datetime.now().year)
+    now_year = datetime.datetime.now().year
+    date = datetime.datetime.strptime(f'{data["date"]}/{now_year}', "%d/%m/%Y")
     stream = data["stream"][data["laba"]]
 
     record = await Record.filter(

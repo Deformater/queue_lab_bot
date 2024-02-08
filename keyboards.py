@@ -1,5 +1,6 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from callbacks import LabaCallback, DateCallback, ActionCallback, CancelCallback
+from settings import LABS_NAMES_LIST
 import datetime
 
 
@@ -11,7 +12,7 @@ def base_keyboard():
     return builder
 
 
-def laba_keyboard(labs: list = ["ОПД", "ПРОГА", "ИНФА"]):
+def laba_keyboard(labs: list = LABS_NAMES_LIST):
     builder = InlineKeyboardBuilder()
     for lab in labs:
         builder.button(text=lab, callback_data=LabaCallback(name=lab))
