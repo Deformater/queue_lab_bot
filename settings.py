@@ -44,4 +44,4 @@ REDIS_PASSWORD = config("REDIS_PASSWORD", cast=str)
 
 ADMIN_ID = config("ADMIN_ID", cast=int)
 
-LABS_NAMES_LIST = ["ОПД", "ПРОГА", "ИНФА", "БД"]
+LABS_NAMES_LIST = ["ОПД", "ПРОГА", "ИНФА", "БД", "ВЕБ", "ЯПЫ"]

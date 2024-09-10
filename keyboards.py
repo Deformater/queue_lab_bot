@@ -18,7 +18,7 @@ def laba_keyboard(labs: list = LABS_NAMES_LIST):
         builder.button(text=lab, callback_data=LabaCallback(name=lab))
 
     # builder.attach(base_keyboard())
-    # builder.adjust(3, 1)
+    builder.adjust(3, 3)
 
     return builder.as_markup()
 
